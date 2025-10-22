@@ -34,11 +34,11 @@ jobs:
           # release-please gives the exact tag name (e.g. v0.33.3 or 0.33.3)
           ref: ${{ steps.rp.outputs.tag_name }}
 
-      - name: Setup Node.js 16
+      - name: Setup Node.js 20
         if: steps.rp.outputs.release_created == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '20'
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
 
