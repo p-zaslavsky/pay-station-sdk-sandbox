@@ -11,11 +11,7 @@ export { FinanceDetails } from './core/finance-details/finance-details.interface
 export { InitialOptions } from './features/headless-checkout/initial-options.interface';
 export { StatusEnum } from './core/status/status.enum';
 
-console.log('yaaaaay!!');
-console.log('new log!');
-console.log('new fix');
-console.log('new feature');
-console.log('new feature 001 awesome');
-console.log('new feature 002 awesome');
-console.log('new feature 003 awesome');
-console.log('some fix was applied here');
+console.log('major version bump!');
+console.log('minor version bump!');
+console.log('patch version bump!');
+console.log('chore!');
