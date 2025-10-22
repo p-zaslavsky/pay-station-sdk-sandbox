@@ -14,3 +14,4 @@ export { StatusEnum } from './core/status/status.enum';
 console.log('major version bump!');
 console.log('minor version bump!');
 console.log('patch version bump!');
+console.log('chore!');
