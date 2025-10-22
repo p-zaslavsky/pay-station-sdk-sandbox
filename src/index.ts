@@ -12,3 +12,4 @@ export { InitialOptions } from './features/headless-checkout/initial-options.int
 export { StatusEnum } from './core/status/status.enum';
 
 console.log('major version bump!');
+console.log('minor version bump!');
