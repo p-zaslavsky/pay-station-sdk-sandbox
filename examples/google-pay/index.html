@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Google Pay</title>
+    <!--
+    Link the SDK bundle.
+    NOTE: In this example, we use a local build just for convenience purposes.
+    -->
+    <script src="../../dist/main.js"></script>
+    <script src="../variables.js"></script>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="../../dist/style.css" />
+  </head>
+
+  <body>
+    <div class="application">
+      <h1>Google pay</h1>
+      <div class="columns-wrapper">
+        <div class="left-col">
+          <!--
+            Add the financial details component to show purchase details.
+          -->
+          <psdk-finance-details></psdk-finance-details>
+          <psdk-total></psdk-total>
+        </div>
+
+        <div class="right-col">
+          <div id="errors-container"></div>
+          <!--
+            FormContainer HTML-node to implement the form with all the controls.
+          -->
+          <div id="form-container"></div>
+          <div id="submit-button-container"></div>
+          <!--
+            StatusContainer HTML-node to implement the StatusComponent component with payment information.
+          -->
+          <div id="status-container"></div>
+        </div>
+      </div>
+
+      <psdk-legal></psdk-legal>
+    </div>
+
+    <!-- Initialization script -->
+    <script>
+      if (typeof PayStationSdk === 'undefined') {
+        alert(payStationSdkUndefinedError);
+        throw new Error('PayStationSdk not found');
+      }
+      /**
+       * To learn more about creating tokens,
+       * refer to https://developers.xsolla.com/api/pay-station/operation/create-token/
+       */
+      const accessToken = '';
+
+      if (!accessToken) {
+        alert('No token provided. Please, check the documentation');
+        throw new Error('No token provided');
+      }
+
+      /**
+       * The SDK is available under the PayStationSdk namespace.
+       * To begin initialization, obtain a reference to the headlessCheckout object.
+       */
+      const { headlessCheckout } = PayStationSdk;
+      const contentElement = document.querySelector('#form-container');
+      const statusElement = document.querySelector('#status-container');
+      const submitButtonContainerElement = document.querySelector(
+        '#submit-button-container',
+      );
+
+      async function initPayStationSdk() {
+        /**
+         * Call the `init()` method with the provided environment object.
+         * The isWebView parameter is required and indicates whether your
+         * integration type is a WebView or not.
+         * You can set sandbox payment mode with `sandbox` parameter
+         * Please note that this command executes asynchronously.
+         */
+        await headlessCheckout.init({
+          isWebView: false,
+          sandbox: false,
+          theme: 'default',
+        });
+
+        /**
+         * After the Payments SDK has been initialized, the next step is setting the token.
+         * To learn more about creating tokens,
+         * refer to https://developers.xsolla.com/api/pay-station/operation/create-token/
+         */
+        await headlessCheckout.setToken(accessToken);
+      }
+
+      function clearPaymentForm() {
+        contentElement.innerHTML = '';
+        submitButtonContainerElement.innerHTML = '';
+      }
+
+      function addSubmitButtonElement() {
+        const submitButtonElement = new PayStationSdk.SubmitButtonComponent();
+        submitButtonContainerElement.appendChild(submitButtonElement);
+      }
+
+      function addPaymentFormElement() {
+        const paymentFormElement = new PayStationSdk.PaymentFormComponent();
+        contentElement.appendChild(paymentFormElement);
+      }
+
+      async function initPaymentForm() {
+        /**
+         * Define payment method ID.
+         * To get lists of payment methods use psdk-payment-methods.
+         * Refer to `examples/select-method` for more details
+         */
+        const googlePayPaymentMethodId = 3431;
+
+        await headlessCheckout.form.init({
+          paymentMethodId: googlePayPaymentMethodId,
+          /**
+           * Initialize payment.
+           * returnUrl will be opened after payment is completed on external payment method side.
+           * Please see `examples/return.html` for more details.
+           */
+          returnUrl: 'http://return',
+        });
+      }
+
+      function handleNextActions() {
+        headlessCheckout.form.onNextAction((nextAction) => {
+          console.info('Next action: ', nextAction);
+
+          if (nextAction.type === 'check_status') {
+            checkStatusAction();
+          }
+
+          /**
+           * To render the GooglePay button, it is necessary to handle the "special_button" NextAction.
+           */
+          if (nextAction.type === 'special_button') {
+            /**
+             * Remove unnecessary form fields to render GooglePayButtonComponent in the same place.
+             */
+            contentElement.innerHTML = '';
+
+            if (nextAction.data.buttonName === 'google-pay') {
+              const googleButton = new PayStationSdk.GooglePayButtonComponent();
+              contentElement.append(googleButton);
+              submitButtonContainerElement.innerHTML = '';
+            }
+          }
+
+          if (nextAction.type === 'show_errors') {
+            showErrorsAction(nextAction);
+            clearPaymentForm();
+          }
+
+          if (nextAction.type === 'redirect') {
+            window.location.href = nextAction.data.redirect.redirectUrl;
+          }
+        });
+      }
+
+      function checkStatusAction() {
+        clearPaymentForm();
+        const statusComponent = new PayStationSdk.StatusComponent();
+        statusElement.appendChild(statusComponent);
+      }
+
+      function showErrorsAction(action) {
+        const errors = action.data.errors ?? [];
+        const formError = errors[0]?.message ?? null;
+
+        const errorsContainer = document.querySelector('#errors-container');
+        const formErrorElement = document.createElement('div');
+        formErrorElement.innerHTML = formError;
+        formErrorElement.classList.add('error');
+        if (errorsContainer) {
+          errorsContainer.append(formErrorElement);
+        }
+      }
+
+      async function main() {
+        await initPayStationSdk();
+        addPaymentFormElement();
+        addSubmitButtonElement();
+        handleNextActions();
+        await initPaymentForm();
+      }
+
+      main();
+    </script>
+  </body>
+</html>

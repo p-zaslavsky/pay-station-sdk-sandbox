@@ -1,0 +1,13 @@
+#edit-saved-methods {
+  font-size: var(--psdk-font-size);
+  font-family: var(--psdk-font-family);
+  line-height: var(--psdk-line-height);
+  margin-top: 20px;
+  width: 100%;
+  max-width: 360px;
+  height: 40px;
+  border-radius: var(--psdk-button-border-radius);
+  background: var(--psdk-button-default-bg);
+  color: var(--psdk-button-color);
+  font-weight: 500;
+}
